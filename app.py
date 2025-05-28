@@ -46,8 +46,10 @@ def download_file(file_id, filename):
     print(f'Downloaded: {filename}')
 
 # Sync all files from Drive
-for filename, file_id in FILES.items():
-    download_file(file_id, filename)
+@app.before_first_request
+def sync_files():
+    for filename, file_id in FILES.items():
+        download_file(file_id, filename)
 
 # Serve files via Flask
 @app.route('/files/<path:filename>')
@@ -59,4 +61,5 @@ def serve_file(filename):
 
 # Run the server
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
