@@ -45,11 +45,13 @@ def download_file(file_id, filename):
         status, done = downloader.next_chunk()
     print(f'Downloaded: {filename}')
 
-# Sync all files from Drive
-@app.before_first_request
-def sync_files():
-    for filename, file_id in FILES.items():
-        download_file(file_id, filename)
+# Sync all files on first request
+@app.before_request
+def sync_files_once():
+    if not hasattr(app, 'files_downloaded'):
+        for filename, file_id in FILES.items():
+            download_file(file_id, filename)
+        app.files_downloaded = True
 
 # Serve files via Flask
 @app.route('/files/<path:filename>')
